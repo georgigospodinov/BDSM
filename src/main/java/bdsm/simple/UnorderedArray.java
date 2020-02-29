@@ -28,6 +28,7 @@ public class UnorderedArray<T> implements Iterable<T> {
         this(DEFAULT_SIZE);
     }
 
+    @SuppressWarnings("CopyConstructorMissesField")
     public UnorderedArray(UnorderedArray<? extends T> array) {
         this(array.size);
         size = array.size;
@@ -62,6 +63,18 @@ public class UnorderedArray<T> implements Iterable<T> {
 
     //<editor-fold desc="Add operations">
     //<editor-fold desc="single item adds">
+    public void insert(int index, T value) {
+        if (index > size) {
+            throw new IndexOutOfBoundsException("index can't be > size: " + index + " > " + size);
+        }
+        if (size == items.length) {
+            expandBackingArray();
+        }
+        items[size] = items[index];
+        size++;
+        items[index] = value;
+    }
+
     public void add(T value) {
         if (size == items.length) {
             expandBackingArray();
@@ -245,14 +258,14 @@ public class UnorderedArray<T> implements Iterable<T> {
 
     @Override
     public Iterator<T> iterator() {
-        return new UAIterator<>();
+        return new UAIterator();
     }
 
     // TODO [2020 Feb 22 Sat 18:45]: Figure out how LibGDX re-uses iterators and apply it here.
     // Current problem: I can't just check if the iterator has reached the end.
     // A search operation can end early.
     // So when is the iterator free to be reset?
-    public class UAIterator<T> implements Iterator<T> {
+    public class UAIterator implements Iterator<T> {
         private int nextIndex = 0;
 
         @Override

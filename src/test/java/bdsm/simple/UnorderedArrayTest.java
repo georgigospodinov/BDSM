@@ -12,9 +12,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class UnorderedArrayTest {
+    /* Note 1:
+     * The UnorderedArray#get(index) is effectively tested since it appears in all the add__ tests.
+     */
     UnorderedArray<Integer> integers = new UnorderedArray<>();
     UnorderedArray<Person> people = new UnorderedArray<>();
 
+    //<editor-fold desc="Constructor tests">
     @Test
     public void defaultConstructor() {
         assertEquals(DEFAULT_SIZE, integers.capacity());
@@ -59,6 +63,7 @@ public class UnorderedArrayTest {
             assertEquals(array[i + start], copy.get(i));
         }
     }
+    //</editor-fold>
 
     @Test
     public void resize() {
@@ -71,6 +76,29 @@ public class UnorderedArrayTest {
     public void expandBackingArrayFromEmptyArray() {
         integers.expandBackingArray();
         assertEquals(DEFAULT_SIZE / 2, integers.capacity());
+    }
+
+    //<editor-fold desc="Add elements tests">
+    @Test
+    public void insert() {
+        integers.add(0, 1, 2, 3);
+        int newValue = 10;
+        int index = 1;
+        integers.insert(index, newValue);
+        assertEquals(newValue, ((int) integers.get(index)));
+    }
+
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void insertOutOfBounds() {
+        integers.insert(1, 10);
+    }
+
+    @Test
+    public void insertLast() {
+        UnorderedArray<Integer> vs = new UnorderedArray<>(1);
+        vs.add(0);
+        vs.insert(1, 10);
+        assertEquals(10, (int) vs.get(1));
     }
 
     @Test
@@ -156,7 +184,9 @@ public class UnorderedArrayTest {
             assertEquals(array.get(i + start), integers.get(i + oldSize));
         }
     }
+    //</editor-fold>
 
+    //<editor-fold desc="indexOf and contains tests">
     @Test
     public void indexOfNull() {
         assertEquals(NOT_IN_ARRAY, integers.indexOfIdentity(null));
@@ -195,6 +225,7 @@ public class UnorderedArrayTest {
         assertTrue(people.contains(georgeNextYear));
         assertFalse(people.containsIdentity(georgeNextYear));
     }
+    //</editor-fold>
 
     @Test
     public void iteration() {
