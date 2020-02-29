@@ -5,12 +5,14 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
+import java.util.HashSet;
 import java.util.Iterator;
 
 @SuppressWarnings("unchecked")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Accessors(fluent = true)
 // TODO [2020 Feb 22 Sat 18:50]: Implement collection!
+// TODO [2020 Feb 29 Sat 16:17]: Static constructors, toString
 public class UnorderedArray<T> implements Iterable<T> {
     public static final int DEFAULT_SIZE = 16;
     public static final double RESIZE_FACTOR = 1.8;
@@ -304,6 +306,30 @@ public class UnorderedArray<T> implements Iterable<T> {
     }
     //</editor-fold>
 
+    public int countIdentity(T value) {
+        int count = 0;
+        for (int i = 0; i < size; i++) {
+            if (value == items[i]) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public int count(T value) {
+        if (value == null) {
+            return countIdentity(null);
+        }
+        int count = 0;
+        for (int i = 0; i < size; i++) {
+            if (value.equals(items[i])) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    //<editor-fold desc="Equals and hashCode">
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -316,9 +342,75 @@ public class UnorderedArray<T> implements Iterable<T> {
         if (this.size != that.size) {
             return false;
         }
-        String sadError = "I realized I need to implement lots of stuff before comparing unordered arrays";
-        throw new UnsupportedOperationException(sadError);
+        return deepEquals(that);
+//        String sadError = "I realized I need to implement lots of stuff before comparing unordered arrays";
+//        throw new UnsupportedOperationException(sadError);
     }
+
+    public boolean equalsIdentities(UnorderedArray<T> that) {
+        if (this.size != that.size) {
+            return false;
+        }
+        return deepEqualsIdentity(that);
+    }
+
+    private boolean deepEqualsIdentity(UnorderedArray<T> that) {
+        HashSet<Integer> usedIndices = new HashSet<>(size);
+        for (T thatItem : that) {
+            int index = firstFreeIndexWithIdentity(usedIndices, thatItem);
+            if (index == NOT_IN_ARRAY) {
+                return false;
+            } else {
+                usedIndices.add(index);
+            }
+        }
+        return true;
+    }
+
+    private int firstFreeIndexWithIdentity(HashSet<Integer> usedIndices, T value) {
+        for (int i = 0; i < size; i++) {
+            if (!usedIndices.contains(i) && value == items[i]) {
+                return i;
+            }
+        }
+        return NOT_IN_ARRAY;
+    }
+
+    private boolean deepEquals(UnorderedArray<T> that) {
+        HashSet<Integer> usedIndices = new HashSet<>(size);
+        for (T thatItem : that) {
+            int index = firstFreeIndexWith(usedIndices, thatItem);
+            if (index == NOT_IN_ARRAY) {
+                return false;
+            } else {
+                usedIndices.add(index);
+            }
+        }
+        return true;
+    }
+
+    private int firstFreeIndexWith(HashSet<Integer> usedIndices, T value) {
+        if (value == null) {
+            return firstFreeIndexWithIdentity(usedIndices, null);
+        }
+        for (int i = 0; i < size; i++) {
+            if (!usedIndices.contains(i) && value.equals(items[i])) {
+                return i;
+            }
+        }
+        return NOT_IN_ARRAY;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 0;
+        for (int i = 0; i < size; i++) {
+            // Same item multiset, in any order, should produce the same hash code.
+            hash += items[i].hashCode();
+        }
+        return hash;
+    }
+    //</editor-fold>
 
     @Override
     public Iterator<T> iterator() {

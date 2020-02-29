@@ -9,6 +9,7 @@ import static bdsm.simple.UnorderedArray.DEFAULT_SIZE;
 import static bdsm.simple.UnorderedArray.NOT_IN_ARRAY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 public class UnorderedArrayTest {
@@ -17,6 +18,8 @@ public class UnorderedArrayTest {
      */
     UnorderedArray<Integer> integers = new UnorderedArray<>();
     UnorderedArray<Person> people = new UnorderedArray<>();
+    private Person futureGeorge = new Person("George", 24);
+    private Person george = new Person("George", 23);
 
     //<editor-fold desc="Constructor tests">
     @Test
@@ -241,14 +244,12 @@ public class UnorderedArrayTest {
 
     @Test
     public void indexOfProper() {
-        Person george = new Person("George", 23);
-        Person georgeNextYear = new Person("George", 24);
         assertEquals(NOT_IN_ARRAY, people.indexOf(george));
         people.add(george);
         assertEquals(0, people.indexOf(george));
-        assertEquals(0, people.indexOf(georgeNextYear));
+        assertEquals(0, people.indexOf(futureGeorge));
         assertEquals(0, people.indexOfIdentity(george));
-        assertEquals(NOT_IN_ARRAY, people.indexOfIdentity(georgeNextYear));
+        assertEquals(NOT_IN_ARRAY, people.indexOfIdentity(futureGeorge));
     }
 
     @Test
@@ -260,13 +261,11 @@ public class UnorderedArrayTest {
 
     @Test
     public void containsProper() {
-        Person george = new Person("George", 23);
-        Person georgeNextYear = new Person("George", 24);
         assertFalse(people.contains(george));
         people.add(george);
         assertTrue(people.containsIdentity(george));
-        assertTrue(people.contains(georgeNextYear));
-        assertFalse(people.containsIdentity(georgeNextYear));
+        assertTrue(people.contains(futureGeorge));
+        assertFalse(people.containsIdentity(futureGeorge));
     }
     //</editor-fold>
 
@@ -292,8 +291,6 @@ public class UnorderedArrayTest {
 
     @Test
     public void removeValue() {
-        Person george = new Person("George", 23);
-        Person futureGeorge = new Person("George", 24);
         people.add(george, futureGeorge);
         assertTrue(people.removeValue(futureGeorge));
         assertEquals(1, people.size());
@@ -301,9 +298,14 @@ public class UnorderedArrayTest {
     }
 
     @Test
+    public void removeNull() {
+        people.add(null);
+        assertTrue(people.removeValue(null));
+        assertFalse(people.removeValue(null));
+    }
+
+    @Test
     public void removeValueIdentity() {
-        Person george = new Person("George", 23);
-        Person futureGeorge = new Person("George", 24);
         people.add(george, futureGeorge);
         assertTrue(people.removeValueIdentity(futureGeorge));
         assertEquals(1, people.size());
@@ -312,8 +314,6 @@ public class UnorderedArrayTest {
 
     @Test
     public void removeValueIdentityNotInArray() {
-        Person george = new Person("George", 23);
-        Person futureGeorge = new Person("George", 24);
         people.add(george);
         assertFalse(people.removeValueIdentity(futureGeorge));
     }
@@ -324,6 +324,64 @@ public class UnorderedArrayTest {
         assertTrue(integers.isNotEmpty());
         integers.clear();
         assertTrue(integers.isEmpty());
+    }
+    //</editor-fold>
+
+    @Test
+    public void count() {
+        integers.add(10, 10, 20, 10);
+        assertEquals(3, integers.count(10));
+        assertEquals(1, integers.count(20));
+        assertEquals(0, integers.count(30));
+    }
+
+    @Test
+    public void countIdentity() {
+        people.add(george, futureGeorge);
+        assertEquals(1, people.countIdentity(george));
+        assertEquals(1, people.countIdentity(futureGeorge));
+    }
+
+    @Test
+    public void countNull() {
+        assertEquals(0, people.count(null));
+        people.add(null, null);
+        assertEquals(2, people.count(null));
+    }
+
+    //<editor-fold desc="Equality and hashCode checks">
+    @Test
+    public void equalityIdentities() {
+        people.addAll(george, null, futureGeorge, george, null, null, george);
+        UnorderedArray<Person> people2 = new UnorderedArray<>();
+        assertFalse(people.equalsIdentities(people2));
+        people2.addAll(george, george, george, null, null, null, futureGeorge);
+        assertTrue(people.equalsIdentities(people2));
+        people.add(futureGeorge);
+        people2.add(george);
+        assertFalse(people.equalsIdentities(people2));
+    }
+
+    @Test
+    public void equality() {
+        integers.addAll(10, 20, 30, 40, 10, 20, null, 10, 10, 40);
+        UnorderedArray<Integer> integers2 = new UnorderedArray<>();
+        assertNotEquals(integers, integers2);
+        integers2.addAll(10, 30, 20, 40, 20, 10);
+        assertNotEquals(integers, integers2);
+        integers2.addAll(null, 40, 10, 10);
+        assertEquals(integers, integers2);
+        integers.add(20);
+        integers2.add(10);
+        assertNotEquals(integers, integers2);
+    }
+
+    @Test
+    public void hash() {
+        integers.add(10, 30, 50);
+        assertEquals(90, integers.hashCode());
+        integers.removeIndex(2);
+        assertEquals(40, integers.hashCode());
     }
     //</editor-fold>
 
