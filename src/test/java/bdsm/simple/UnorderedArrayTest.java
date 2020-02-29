@@ -65,6 +65,7 @@ public class UnorderedArrayTest {
     }
     //</editor-fold>
 
+    //<editor-fold desc="Resize and emptiness tests">
     @Test
     public void resize() {
         int cap = 10;
@@ -78,6 +79,16 @@ public class UnorderedArrayTest {
         assertEquals(DEFAULT_SIZE / 2, integers.capacity());
     }
 
+    @Test
+    public void emptiness() {
+        assertTrue(integers.isEmpty());
+        assertFalse(integers.isNotEmpty());
+        integers.add(10, 20);
+        assertFalse(integers.isEmpty());
+        assertTrue(integers.isNotEmpty());
+    }
+    //</editor-fold>
+
     //<editor-fold desc="Add elements tests">
     @Test
     public void insert() {
@@ -86,6 +97,7 @@ public class UnorderedArrayTest {
         int index = 1;
         integers.insert(index, newValue);
         assertEquals(newValue, ((int) integers.get(index)));
+        assertEquals(5, integers.size());
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
@@ -99,6 +111,7 @@ public class UnorderedArrayTest {
         vs.add(0);
         vs.insert(1, 10);
         assertEquals(10, (int) vs.get(1));
+        assertEquals(2, vs.size());
     }
 
     @Test
@@ -186,6 +199,36 @@ public class UnorderedArrayTest {
     }
     //</editor-fold>
 
+    //<editor-fold desc="Retrieval tests">
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void getIndexOutOfBounds() {
+        integers.add(10);
+        integers.get(1);
+    }
+
+    @Test
+    public void first() {
+        integers.add(10, 20, 30);
+        assertEquals(10, ((int) integers.first()));
+    }
+
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void firstEmpty() {
+        integers.first();
+    }
+
+    @Test
+    public void last() {
+        integers.add(10, 20, 30);
+        assertEquals(30, ((int) integers.last()));
+    }
+
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void lastEmpty() {
+        integers.last();
+    }
+    //</editor-fold>
+
     //<editor-fold desc="indexOf and contains tests">
     @Test
     public void indexOfNull() {
@@ -224,6 +267,63 @@ public class UnorderedArrayTest {
         assertTrue(people.containsIdentity(george));
         assertTrue(people.contains(georgeNextYear));
         assertFalse(people.containsIdentity(georgeNextYear));
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="Remove elements tests">
+    @Test
+    public void removeIndex() {
+        integers.add(10, 20, 30);
+        assertEquals(20, ((int) integers.removeIndex(1)));
+        assertEquals(2, integers.size());
+    }
+
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void removeIndexOutOfBounds() {
+        integers.removeIndex(1);
+    }
+
+    @Test
+    public void removeValueNotInArray() {
+        integers.add(10, 20, 30);
+        assertFalse(integers.removeValue(40));
+        assertEquals(3, integers.size());
+    }
+
+    @Test
+    public void removeValue() {
+        Person george = new Person("George", 23);
+        Person futureGeorge = new Person("George", 24);
+        people.add(george, futureGeorge);
+        assertTrue(people.removeValue(futureGeorge));
+        assertEquals(1, people.size());
+        assertTrue(people.containsIdentity(futureGeorge));
+    }
+
+    @Test
+    public void removeValueIdentity() {
+        Person george = new Person("George", 23);
+        Person futureGeorge = new Person("George", 24);
+        people.add(george, futureGeorge);
+        assertTrue(people.removeValueIdentity(futureGeorge));
+        assertEquals(1, people.size());
+        assertFalse((people.containsIdentity(futureGeorge)));
+    }
+
+    @Test
+    public void removeValueIdentityNotInArray() {
+        Person george = new Person("George", 23);
+        Person futureGeorge = new Person("George", 24);
+        people.add(george);
+        assertFalse(people.removeValueIdentity(futureGeorge));
+    }
+
+    @Test
+    public void clear() {
+        integers.add(10, 20, 30);
+        assertTrue(integers.isNotEmpty());
+        integers.clear();
+        assertTrue(integers.isEmpty());
     }
     //</editor-fold>
 

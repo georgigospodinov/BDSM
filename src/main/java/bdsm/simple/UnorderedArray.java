@@ -46,8 +46,17 @@ public class UnorderedArray<T> implements Iterable<T> {
     }
     //</editor-fold>
 
+    //<editor-fold desc="Size operations">
     public int capacity() {
         return items.length;
+    }
+
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
+    public boolean isNotEmpty() {
+        return size > 0;
     }
 
     protected void resize(int newSize) {
@@ -60,6 +69,7 @@ public class UnorderedArray<T> implements Iterable<T> {
     protected void expandBackingArray() {
         resize(Math.max(DEFAULT_SIZE / 2, (int) (size * RESIZE_FACTOR)));
     }
+    //</editor-fold>
 
     //<editor-fold desc="Add operations">
     //<editor-fold desc="single item adds">
@@ -143,12 +153,28 @@ public class UnorderedArray<T> implements Iterable<T> {
     //</editor-fold>
     //</editor-fold>
 
+    //<editor-fold desc="Retrieval operations">
     public T get(int index) {
         if (index >= size) {
             throw new IndexOutOfBoundsException("index can't be >= size: " + index + " >= " + size);
         }
         return items[index];
     }
+
+    public T first() {
+        if (size == 0) {
+            throw new IndexOutOfBoundsException("Array is empty.");
+        }
+        return items[0];
+    }
+
+    public T last() {
+        if (size == 0) {
+            throw new IndexOutOfBoundsException("Array is empty.");
+        }
+        return items[size - 1];
+    }
+    //</editor-fold>
     //<editor-fold desc="Index Of & Contains">
 
     /**
@@ -237,6 +263,44 @@ public class UnorderedArray<T> implements Iterable<T> {
             }
         }
         return true;
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="Remove operations">
+    public T removeIndex(int index) {
+        if (index >= size) {
+            throw new IndexOutOfBoundsException("index can't be >= size: " + index + " >= " + size);
+        }
+        T value = items[index];
+        size--;
+        items[index] = items[size];
+        items[size] = null;
+        return value;
+    }
+
+    public boolean removeValue(T value) {
+        int index = indexOf(value);
+        if (index == NOT_IN_ARRAY) {
+            return false;
+        }
+        removeIndex(index);
+        return true;
+    }
+
+    public boolean removeValueIdentity(T value) {
+        int index = indexOfIdentity(value);
+        if (index == NOT_IN_ARRAY) {
+            return false;
+        }
+        removeIndex(index);
+        return true;
+    }
+
+    public void clear() {
+        for (int i = 0; i < size; i++) {
+            items[i] = null;
+        }
+        size = 0;
     }
     //</editor-fold>
 
